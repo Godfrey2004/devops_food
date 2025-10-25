@@ -1,0 +1,49 @@
+---
+- name: Deploy WebTech Application
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Install Docker
+      become: yes
+      package:
+        name: docker.io
+        state: present
+
+    - name: Install Docker Compose
+      become: yes
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Start Docker service
+      become: yes
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create application directory
+      file:
+        path: /opt/webtech-app
+        state: directory
+        mode: '0755'
+
+    - name: Copy application files
+      copy:
+        src: "{{ item }}"
+        dest: /opt/webtech-app/
+      loop:
+        - Dockerfile
+        - docker-compose.yml
+        - package.json
+        - server.js
+        - *.html
+        - *.js
+        - *.css
+        - assets/
+
+    - name: Deploy application with Docker Compose
+      command: docker-compose up -d
+      args:
+        chdir: /opt/webtech-app

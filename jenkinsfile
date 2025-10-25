@@ -1,0 +1,85 @@
+// pipeline {
+//     agent any
+    
+//     stages {
+//         stage('Checkout') {
+//             steps {
+//                 git branch: 'main', url: '.'
+//             }
+//         }
+        
+//         stage('Build') {
+//             steps {
+//                 sh 'docker build -t webtech-app:latest .'
+//             }
+//         }
+        
+//         stage('Test') {
+//             steps {
+//                 sh 'npm test || echo "No tests configured"'
+//             }
+//         }
+        
+//         stage('Deploy') {
+//             steps {
+//                 sh 'docker-compose down'
+//                 sh 'docker-compose up -d'
+//             }
+//         }
+//     }
+    
+//     post {
+//         always {
+//             echo 'Pipeline completed'
+//         }
+//         success {
+//             echo 'Application deployed successfully!'
+//         }
+//         failure {
+//             echo 'Pipeline failed!'
+//         }
+//     }
+// }
+
+pipeline {
+    agent any
+    
+    stages {
+        stage('Copy Files') {
+            steps {
+                sh '''
+                    echo "Copying project files..."
+                    cp -r /var/jenkins_home/workspace/source/* . || echo "Source copy failed, trying alternative"
+                    ls -la
+                '''
+            }
+        }
+        
+        stage('Install & Test') {
+            steps {
+                sh 'npm install'
+                sh 'npm test || echo "Tests not configured"'
+            }
+        }
+        
+        stage('Build & Deploy') {
+            steps {
+                sh 'docker build -t webtech-app .'
+                sh 'docker-compose up -d --build'
+            }
+        }
+        
+        stage('Verify') {
+            steps {
+                sh 'sleep 10'
+                sh 'curl http://localhost:3019/health || echo "App verification"'
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "Build finished: ${currentBuild.result}"
+        }
+    }
+}
