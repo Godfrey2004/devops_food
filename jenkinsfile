@@ -41,35 +41,84 @@
 //     }
 // }
 
+// pipeline {
+//     agent any
+    
+//     stages {
+//         stage('Copy Files') {
+//             steps {
+//                 sh '''
+//                     echo "Copying project files..."
+//                     cp -r /var/jenkins_home/workspace/source/* . || echo "Source copy failed, trying alternative"
+//                     ls -la
+//                 '''
+//             }
+//         }
+        
+//         stage('Install & Test') {
+//             steps {
+//                 sh 'npm install'
+//                 sh 'npm test || echo "Tests not configured"'
+//             }
+//         }
+        
+//         stage('Build & Deploy') {
+//             steps {
+//                 sh 'docker build -t webtech-app .'
+//                 sh 'docker-compose up -d --build'
+//             }
+//         }
+        
+//         stage('Verify') {
+//             steps {
+//                 sh 'sleep 10'
+//                 sh 'curl http://localhost:3019/health || echo "App verification"'
+//             }
+//         }
+//     }
+    
+//     post {
+//         always {
+//             echo "Build finished: ${currentBuild.result}"
+//         }
+//     }
+// }
 pipeline {
     agent any
     
     stages {
-        stage('Copy Files') {
+        stage('Checkout Git') {
             steps {
-                sh '''
-                    echo "Copying project files..."
-                    cp -r /var/jenkins_home/workspace/source/* . || echo "Source copy failed, trying alternative"
-                    ls -la
-                '''
+                git branch: 'main', url: 'file:///e/WEBTECH PROJ'
             }
         }
         
-        stage('Install & Test') {
+        stage('Install Dependencies') {
             steps {
                 sh 'npm install'
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
                 sh 'npm test || echo "Tests not configured"'
             }
         }
         
-        stage('Build & Deploy') {
+        stage('Build Docker Image') {
             steps {
                 sh 'docker build -t webtech-app .'
+            }
+        }
+        
+        stage('Deploy to Local') {
+            steps {
+                sh 'docker-compose down || true'
                 sh 'docker-compose up -d --build'
             }
         }
         
-        stage('Verify') {
+        stage('Verify Deployment') {
             steps {
                 sh 'sleep 10'
                 sh 'curl http://localhost:3019/health || echo "App verification"'
@@ -80,6 +129,12 @@ pipeline {
     post {
         always {
             echo "Build finished: ${currentBuild.result}"
+        }
+        success {
+            echo '✅ Application deployed successfully at http://localhost:3019'
+        }
+        failure {
+            echo '❌ Pipeline failed - check console output'
         }
     }
 }
