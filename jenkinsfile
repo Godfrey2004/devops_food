@@ -87,7 +87,7 @@ pipeline {
     agent any
     
     triggers {
-        pollSCM('H/2 * * * *')  // Auto-check every 2 minutes
+        pollSCM('* * * * *')  // Auto-check every 2 minutes
     }
     
     stages {
