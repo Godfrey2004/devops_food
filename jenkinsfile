@@ -146,13 +146,11 @@
 //     }
 // }
 
-
-
 pipeline {
     agent any
     
     triggers {
-        pollSCM('* * * * *')  // Every minute
+        pollSCM('* * * * *')
     }
     
     environment {
@@ -182,7 +180,7 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh 'sleep 10'
-                sh 'curl http://localhost:3019/health || echo "Health check completed"
+                sh 'curl http://localhost:3019/health || echo "Health check completed"'
             }
         }
     }
