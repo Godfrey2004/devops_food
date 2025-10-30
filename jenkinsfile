@@ -86,87 +86,35 @@
 
 
 
-// pipeline {
-//     agent any
-    
-//     triggers {
-//         pollSCM('* * * * *')  // Auto-check every 2 minutes
-//     }
-    
-//     stages {
-//         stage('Checkout Git') {
-//             steps {
-//                 git branch: 'main', url: 'file:///e/WEBTECH PROJ'
-//             }
-//         }
-        
-//         stage('Install Dependencies') {
-//             steps {
-//                 sh 'npm install'
-//             }
-//         }
-        
-//         stage('Run Tests') {
-//             steps {
-//                 sh 'npm test || echo "Tests not configured"'
-//             }
-//         }
-        
-//         stage('Build Docker Image') {
-//             steps {
-//                 sh 'docker build -t webtech-app .'
-//             }
-//         }
-        
-//         stage('Deploy to Local') {
-//             steps {
-//                 sh 'docker-compose down || true'
-//                 sh 'docker-compose up -d --build'
-//             }
-//         }
-        
-//         stage('Verify Deployment') {
-//             steps {
-//                 sh 'sleep 10'
-//                 sh 'curl http://localhost:3019/health || echo "App verification"'
-//             }
-//         }
-//     }
-    
-//     post {
-//         always {
-//             echo "Auto-build finished: ${currentBuild.result}"
-//         }
-//         success {
-//             echo '✅ Application auto-deployed successfully!'
-//         }
-//         failure {
-//             echo '❌ Auto-build failed'
-//         }
-//     }
-// }
-
 pipeline {
     agent any
     
     triggers {
-        pollSCM('* * * * *')
-    }
-    
-    environment {
-        APP_NAME = 'webtech-app'
+        pollSCM('* * * * *')  // Auto-check every 2 minutes
     }
     
     stages {
         stage('Checkout Git') {
             steps {
-                git branch: 'main', url: 'https://github.com/Godfrey2004/devops_food.git'
+                git branch: 'main', url: 'file:///e/WEBTECH PROJ'
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                sh 'npm test || echo "Tests not configured"'
             }
         }
         
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ${APP_NAME}:latest .'
+                sh 'docker build -t webtech-app .'
             }
         }
         
@@ -180,17 +128,21 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh 'sleep 10'
-                sh 'curl http://localhost:3019/health || echo "Health check completed"'
+                sh 'curl http://localhost:3019/health || echo "App verification"'
             }
         }
     }
     
     post {
         always {
-            echo "Pipeline ${currentBuild.result}"
+            echo "Auto-build finished: ${currentBuild.result}"
         }
         success {
-            echo '✅ SUCCESS: Application deployed to http://localhost:3019'
+            echo '✅ Application auto-deployed successfully!'
+        }
+        failure {
+            echo '❌ Auto-build failed'
         }
     }
 }
+
