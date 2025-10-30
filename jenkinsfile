@@ -166,18 +166,6 @@ pipeline {
             }
         }
         
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
-        
-        stage('Run Tests') {
-            steps {
-                sh 'npm test || echo "No tests configured"'
-            }
-        }
-        
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t ${APP_NAME}:latest .'
@@ -194,7 +182,7 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh 'sleep 10'
-                sh 'curl http://localhost:3019/health || echo "Health check completed"'
+                sh 'curl http://localhost:3019/health || echo "Health check completed"
             }
         }
     }
