@@ -1,9 +1,0 @@
----
-- name: Deploy WebTech Application Locally
-  hosts: localhost
-  tasks:
-    - name: Ensure Docker is running
-      command: docker --version
-      
-    - name: Deploy application stack
-      command: docker-compose up -d
