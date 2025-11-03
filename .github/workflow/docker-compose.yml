@@ -1,0 +1,51 @@
+name: Docker Compose Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Compose
+      run: |
+        docker-compose version
+        
+    - name: Build with Docker Compose
+      run: |
+        docker-compose -f docker-compose.yml build
+        
+    - name: Test with Docker Compose
+      run: |
+        docker-compose -f docker-compose.yml up -d
+        sleep 10
+        docker-compose ps
+        docker-compose down
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-images
+        path: |
+          Dockerfile
+          docker-compose.yml
+        retention-days: 7
+        
+    - name: Deployment Summary
+      run: |
+        echo "🎉 BUILD SUCCESSFUL!"
+        echo "📝 Commit: ${{ github.sha }}"
+        echo "👤 Author: ${{ github.actor }}"
+        echo "📅 Triggered: ${{ github.event.head_commit.timestamp }}"
+        echo "🌐 Application would be live at: http://localhost:3019"
